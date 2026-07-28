@@ -91,7 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pokédex')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'PokéFlutter',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: FutureBuilder<List<Pokemon>>(
         future: _pokemonsFuture,
         builder: (context, snapshot) {
@@ -99,12 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
           // 2. ERROR — the Future completed with an exception
           if (snapshot.hasError) {
             return ErrorView(error: snapshot.error, onRetry: _retry);
           }
-
           // 3. SUCCESS — paint the accumulated list, not the snapshot,
           // so "Cargar más" can append pages to it
           return _buildContent(_pokemons);
@@ -117,7 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final filtered = pokemons
         .where((p) => p.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
-
     return Column(
       children: [
         Padding(
@@ -126,17 +129,42 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: InputDecoration(
               hintText: 'Busca un Pokémon...',
               prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
               errorText: _searchError,
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
             onChanged: _onSearchChanged,
           ),
         ),
+        // NUEVO: contador de resultados
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${filtered.length} Pokémon encontrados',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
         Expanded(
           // GridView is a shorthand for CustomScrollView + SliverGrid; using
           // them directly lets a full-width button scroll after the grid.
           child: filtered.isEmpty
-              ? const Center(child: Text('Ningún Pokémon coincide'))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.search_off, size: 80, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text('No se encontraron Pokémon'),
+                    ],
+                  ),
+                )
               : CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -166,12 +194,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     // scrolls with the grid: only visible at the very end
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton(
+                          child: OutlinedButton.icon(
                             onPressed: _isLoadingMore ? null : _loadMore,
-                            child: _isLoadingMore
+                            icon: _isLoadingMore
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,
@@ -179,7 +207,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Cargar más'),
+                                : const Icon(Icons.expand_more),
+                            label: Text(
+                              _isLoadingMore
+                                  ? 'Cargando...'
+                                  : 'Cargar más Pokémon',
+                            ),
                           ),
                         ),
                       ),

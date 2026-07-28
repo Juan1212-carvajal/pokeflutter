@@ -10,25 +10,34 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) {
-          print('index ===========> $index - currentIndex: ${navigationShell.currentIndex}');
+
+      // NUEVO: NavigationBar Material 3
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+
+        // NUEVO: color del indicador
+        indicatorColor: Colors.red.shade100,
+
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.catching_pokemon),
+            selectedIcon: Icon(Icons.catching_pokemon, color: Colors.red),
+            label: 'Pokédex',
+          ),
+
+          NavigationDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite, color: Colors.red),
+            label: 'Favoritos',
+          ),
+        ],
+
+        onDestinationSelected: (index) {
           navigationShell.goBranch(
             index,
             initialLocation: index == navigationShell.currentIndex,
           );
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.catching_pokemon),
-            label: 'Pokédex',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favoritos',
-          ),
-        ],
       ),
     );
   }
